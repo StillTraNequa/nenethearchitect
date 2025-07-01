@@ -1,0 +1,179 @@
+.coming-soon-hero {
+    background-color: #baf3cb; /* Mint background */
+    padding: 2rem 1rem;
+    text-align: center;
+    position: relative;
+    min-height: 100vh;
+    display: flex;
+    flex-direction: column;
+    justify-content: center;
+    align-items: center;
+    overflow-x: hidden;
+  }
+  
+  .hero-content {
+    max-width: 900px;
+    margin: 0 auto;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+  }
+  
+  .service-buttons {
+    display: grid;
+    grid-template-columns: repeat(3, minmax(150px, 1fr));
+    gap: 1.5rem;
+    justify-content: center;
+    align-items: center;
+    max-width: 900px;
+    margin: 0 auto 2rem;
+    text-align: center;
+    position: relative;
+    z-index: 2;
+    order: 1;
+  }
+  
+  .service-button {
+    background: #fff;
+    color: #111;
+    padding: 0.75rem 1.25rem;
+    border-radius: 8px;
+    font-weight: 600;
+    font-family: 'Poppins', sans-serif;
+    box-shadow: 0 2px 6px rgba(0, 0, 0, 0.1);
+    transition: transform 0.2s ease, box-shadow 0.2s ease;
+    cursor: default;
+  }
+  
+  .service-button:hover {
+    transform: scale(1.03);
+    box-shadow: 0 0 10px #ffc0f3;
+  }
+  
+  .coming-soon-img {
+    width: 100%;
+    max-width: 1200px;
+    height: auto;
+    margin: 2rem auto;
+    display: block;
+    margin-top: -120px;    /* adjust as needed */
+    margin-bottom: -70px; /* adjust as needed */
+    pointer-events: none;
+    position: relative;
+    z-index: 1;
+    order: 2;
+  }
+  
+  .coming-soon-subtext {
+    font-size: 1.2rem;
+    max-width: 700px;
+    margin: 0 auto;
+    line-height: 1.6;
+    color: #111;
+    font-family: 'Outfit', sans-serif;
+    order: 3;
+  }
+
+  .back-button {
+    align-self: self-start;
+    margin-bottom: 1rem;
+    margin-top: 1rem; /* Adds space only above the button */
+    padding: 0.5rem 1rem;
+    font-size: 1rem;
+    font-weight: 600;
+    font-family: 'Poppins', sans-serif;
+    background: #fff !important;
+    color: white !important;
+    border-radius: 8px;
+    text-decoration: none;
+    box-shadow: 0 2px 5px rgba(0, 0, 0, 0.1);
+    transition: all 0.2s ease;
+  }
+  
+  .back-button:hover {
+    background-color: black !important;
+    color: white;
+    box-shadow: 0 0 10px var(--primary-color);
+    transform: translateY(-2px);
+  }
+  
+  
+  /* Responsive tweaks */
+  @media (max-width: 768px) {
+    .service-buttons {
+        display: flex;
+        flex-wrap: wrap;
+        gap: 1rem;
+        justify-content: center;
+      }
+      
+    .coming-soon-hero {
+        padding: 1rem;
+      }
+    
+      .service-button {
+        width: 48%; /* 2 per row */
+        font-size: 0.95rem;
+        padding: 0.6rem 1rem;
+      }
+    
+      .coming-soon-img {
+        width: 90%;
+        max-width: 700px;
+        margin: 0.5rem auto !important; 
+      }
+    
+      .coming-soon-subtext {
+        font-size: 1rem;
+        padding: 0 1rem;
+      }
+  }
+  
+  @media (max-width: 480px) {
+    .coming-soon-img {
+      max-width: 300px;
+      margin: 1rem auto !important;
+    }
+  
+    .coming-soon-subtext {
+      font-size: 0.95rem;
+    }
+  
+    .service-button {
+      font-size: 0.9rem;
+      padding: 0.6rem 1rem;
+    }
+  }
+  @media (max-width: 1024px) {
+    .coming-soon-img {
+      order: 1;
+      width: 90%;
+      max-width: 500px;
+      margin: 1.5rem auto;
+    }
+  
+    .service-buttons {
+      order: 2;
+      display: flex;
+      flex-wrap: wrap;
+      gap: 1rem;
+      justify-content: center;
+    }
+  
+    .service-button {
+      width: 48%;
+      font-size: 0.95rem;
+      padding: 0.6rem 1rem;
+    }
+  
+    .coming-soon-subtext {
+      order: 3;
+      font-size: 1rem;
+      padding: 0 1rem;
+    }
+  }
+  
+  
+  
+  
+  

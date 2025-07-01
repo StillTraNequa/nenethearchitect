@@ -1,0 +1,44 @@
+.nail-preview-wrapper {
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    height: 100px;
+}
+
+.nail-visual {
+    width: 40px;
+    height: 70px;
+    border-radius: 20px;
+    border: 1px solid #ccc;
+    transition: all 0.3s ease;
+}
+
+/* Shape Variants */
+.nail-visual.square {
+    border-radius: 5px;
+}
+
+.nail-visual.almondetto {
+    border-radius: 25px 25px 10px 10px;
+}
+
+.nail-visual.coffin {
+    clip-path: polygon(25% 0%, 75% 0%, 100% 100%, 0% 100%);
+}
+
+/* Length Variants */
+.nail-visual.extra-short {
+    height: 40px;
+}
+
+.nail-visual.short {
+    height: 55px;
+}
+
+.nail-visual.medium {
+    height: 70px;
+}
+
+.nail-visual.long {
+    height: 90px;
+}

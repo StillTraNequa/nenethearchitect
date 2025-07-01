@@ -1,13 +1,157 @@
-body {
-  margin: 0;
-  font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', 'Roboto', 'Oxygen',
-    'Ubuntu', 'Cantarell', 'Fira Sans', 'Droid Sans', 'Helvetica Neue',
-    sans-serif;
-  -webkit-font-smoothing: antialiased;
-  -moz-osx-font-smoothing: grayscale;
+@import url('https://fonts.googleapis.com/css2?family=Anonymous+Pro:wght@400;700&display=swap');
+@import url(https://db.onlinewebfonts.com/c/3163ac25d9e794b6612569ef09b2fa59?family=Ahkio-Bold);
+
+:root {
+  --primary-color: #fdc7d7;
+  --primary-hover: #e86ba5; /* deeper pink for better contrast */
+  --secondary-color: #3b1b72;
+  --nail-green: #e7e9b1;
+  --nail-purple: #decbef;
+  --neutral-bg: #c9ceed;
+  --body-font: 'Anonymous Pro', monospace;
+  --radius: 8px;
+  --nail-font: 'Ahkio'
 }
 
-code {
-  font-family: source-code-pro, Menlo, Monaco, Consolas, 'Courier New',
-    monospace;
+body {
+  font-family: var(--body-font);
+  background-color: #fff;
+  color: var(--secondary-color);
+  margin: 0;
+  padding: 0;
+  margin: 0;
+}
+
+html, body {
+  width: 100%;
+  overflow-x: hidden;
+}
+
+h1, h2, h3, h4 {
+  font-family: var(--heading-font);
+  color: var(--secondary-color);
+}
+
+button {
+  background-color: var(--secondary-color);  
+  color: var(--primary-color);                 
+  font-family: var(--body-font);
+  font-weight: 600;
+  font-size: 1rem;
+  padding: 0.75rem 1.25rem;
+  border: none;
+  border-radius: var(--radius);
+  cursor: pointer;
+  transition: all 0.3s ease;
+}
+
+button:hover {
+  background-color: var(--primary-color);    
+  color: var(--secondary-color);                  
+}
+
+button:disabled {
+  opacity: 0.6;
+  cursor: not-allowed;
+}
+
+.button-outline {
+  background-color: transparent;
+  border: 2px solid var(--secondary-color);
+  color: var(--secondary-color);
+}
+
+.button-outline:hover {
+  background-color: var(--secondary-color);
+  color: var(--neutral-bg);
+}
+
+.work-link {
+  font-family: var(--body-font);
+  font-style: italic;
+  color: var(--secondary-color);
+  font-size: 1rem;
+  cursor: pointer;
+  transition: color 0.3s ease;
+  text-decoration: none;
+  display: inline-block;
+  margin: 1rem;
+  z-index: 10;
+}
+
+.work-link:hover {
+  color: var(--primary-color); /* pink on hover */
+}
+
+.site-footer {
+  width: 100%;
+  padding-top: 1.5rem;
+  padding-bottom: 1.5rem;
+  background-color: var(--primary-color); /* Your deep purple */
+  color: black; /* Use white text for contrast */
+  font-family: 'Outfit', sans-serif; /* Pick one font */
+  font-size: 0.95rem;
+  text-align: center;
+  border-top: 1px solid rgba(255, 255, 255, 0.1); /* subtle divider */
+}
+
+
+.footer-content {
+  display: flex;
+  flex-direction: column;       /* stack text and icons vertically */
+  align-items: center;          /* center horizontally */
+  justify-content: center;
+  gap: 1rem;                    /* spacing between text and icons */
+  width: 100%;
+}
+
+.footer-content p {
+  margin: 0;
+  text-align: center;           /* center text inside paragraph */
+}
+
+.social-links {
+  display: flex;
+  gap: 1.25rem;
+  justify-content: center;      /* center social icons horizontally */
+  width: auto;
+}
+
+.social-links a {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  text-decoration: none;
+  transition: all 0.3s ease;
+}
+
+.social-links a svg {
+  color: var(--secondary-color); /* your brand color */
+  transition: all 0.3s ease;
+}
+
+.social-links a:hover svg {
+  transform: scale(1.15);
+  filter: drop-shadow(0 0 5px var(--secondary-color))
+          drop-shadow(0 0 10px var(--secondary-color))
+          drop-shadow(0 0 15px var(--secondary-color));
+}
+
+.site-footer, .footer-content, .footer-content p {
+  width: 100% !important;
+  margin: 0 auto !important;
+  text-align: center !important;
+  display: flex !important;
+  justify-content: center !important;
+  align-items: center !important;
+  flex-direction: column !important;
+}
+
+/* Mobile tweak */
+@media (max-width: 600px) {
+  .footer-content {
+    flex-direction: column;
+    align-items: center;
+    text-align: center;
+  }
 }

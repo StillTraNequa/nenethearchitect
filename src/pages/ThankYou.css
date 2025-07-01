@@ -1,0 +1,65 @@
+.thank-you-page {
+    font-family: 'Poppins', sans-serif;
+    min-height: 100vh;
+    background-image: url('../assets/nails-bg.png');
+    background-size: cover;
+    background-position: center;
+    background-repeat: no-repeat;
+    display: flex;
+    flex-direction: column;
+    justify-content: space-between;
+}
+
+.thank-you-content {
+    text-align: center;
+    padding: 4rem 2rem;
+    color: #d73b77;
+    max-width: 700px;
+    margin: 8rem auto;
+    background: rgba(255, 255, 255, 0.85);
+    border-radius: 20px;
+}
+
+.thank-you-content h1 {
+    font-size: 2.5rem;
+    margin-bottom: 1rem;
+}
+
+.thank-you-content p {
+    font-size: 1.1rem;
+    margin-bottom: 1rem;
+}
+
+.shop-more-btn {
+    margin-top: 2rem;
+    display: inline-block;
+    padding: 0.75rem 1.5rem;
+    background-color: #d73b77;
+    color: #fff;
+    border-radius: 10px;
+    text-decoration: none;
+    font-weight: bold;
+    transition: background 0.3s ease;
+}
+
+.shop-more-btn:hover {
+    background-color: #e754a3;
+}
+
+/* Mobile Styles */
+@media (max-width: 768px) {
+
+    .thank-you-content {
+        padding: 3rem 1rem;
+        margin: 10rem 1.5rem;
+        
+    }
+
+    .thank-you-content h1 {
+        font-size: 2rem;
+    }
+
+    .thank-you-content p {
+        font-size: 1rem;
+    }
+}
