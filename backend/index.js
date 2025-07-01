@@ -42,8 +42,8 @@ app.post('/create-checkout-session', async (req, res) => {
       line_items,
       mode: 'payment',
       customer_email: email,
-      success_url: `${process.env.FRONTEND_URL}/thank-you`,
-      cancel_url: `${process.env.FRONTEND_URL}/cart`,
+      success_url: `${process.env.FRONTEND_URL}/nails/thank-you`,
+      cancel_url: `${process.env.FRONTEND_URL}/nails/cart`,
       metadata: {
         optedIn: optedIn ? 'true' : 'false',
       },
