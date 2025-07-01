@@ -24,7 +24,7 @@ router.post('https://nenethearchitect.onrender.com/create-checkout-session', asy
       payment_method_types: ['card'],
       line_items,
       mode: 'payment',
-      customer_email: email, // 👈 necessary for Stripe email receipt
+      // customer_email: email, 
       success_url: `${process.env.FRONTEND_URL}/thank-you`,
       cancel_url: `${process.env.FRONTEND_URL}/cart`,
     });

@@ -56,31 +56,31 @@ app.post('/create-checkout-session', async (req, res) => {
   }
 });
 
-app.post('/webhook', express.raw({ type: 'application/json' }), (request, response) => {
-  const sig = request.headers['stripe-signature'];
+// app.post('/webhook', express.raw({ type: 'application/json' }), (request, response) => {
+//   const sig = request.headers['stripe-signature'];
 
-  let event;
-  try {
-    event = stripe.webhooks.constructEvent(request.body, sig, process.env.STRIPE_WEBHOOK_SECRET);
-  } catch (err) {
-    console.error('Webhook signature verification failed:', err.message);
-    return response.sendStatus(400);
-  }
+//   let event;
+//   try {
+//     event = stripe.webhooks.constructEvent(request.body, sig, process.env.STRIPE_WEBHOOK_SECRET);
+//   } catch (err) {
+//     console.error('Webhook signature verification failed:', err.message);
+//     return response.sendStatus(400);
+//   }
 
-  if (event.type === 'checkout.session.completed') {
-    const session = event.data.object;
+//   if (event.type === 'checkout.session.completed') {
+//     const session = event.data.object;
 
-    const email = session.customer_email;
-    const optedIn = session.metadata?.optedIn === 'true';
+//     const email = session.customer_email;
+//     const optedIn = session.metadata?.optedIn === 'true';
 
-    if (optedIn && email) {
-      console.log('✅ Send to Google Sheets:', email);
-      // TODO: Add function here to send to Google Sheet
-    }
-  }
+//     if (optedIn && email) {
+//       console.log('✅ Send to Google Sheets:', email);
+//       // TODO: Add function here to send to Google Sheet
+//     }
+//   }
 
-  response.status(200).send('Webhook received');
-});
+//   response.status(200).send('Webhook received');
+// });
 
 
 // Start server
