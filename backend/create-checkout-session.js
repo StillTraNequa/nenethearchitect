@@ -4,7 +4,7 @@ const router = express.Router();
 
 const stripe = Stripe(process.env.STRIPE_SECRET_KEY); 
 
-router.post('https://nene-backend.onrender.com/create-checkout-session', async (req, res) => {
+router.post('https://nenethearchitect.onrender.com/create-checkout-session', async (req, res) => {
   const { items, email } = req.body;
 
   const line_items = items.map((item) => ({

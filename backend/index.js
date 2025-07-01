@@ -12,6 +12,14 @@ const stripe = Stripe(process.env.STRIPE_SECRET_KEY);
 app.use(cors({ origin: process.env.FRONTEND_URL })); // Change to your frontend domain
 app.use(express.json());
 
+app.get('/', (req, res) => {
+  res.send('Hello, the backend is working!');
+});
+
+app.get('/nails', (req, res) => {
+  res.send('Nails route is working!');
+});
+
 // Route to create checkout session
 app.post('/create-checkout-session', async (req, res) => {
   try {
