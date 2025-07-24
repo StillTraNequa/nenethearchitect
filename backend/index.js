@@ -109,14 +109,13 @@ app.post('/create-checkout-session', async (req, res) => {
 });
 
 // Webhook for Stripe events
-const endpointSecret = "whsec_3daf2d87b1e5dd8199a7a9a221f1d7f1a5fa0ee002f943981231572e40d45fb4";
+// Webhook for Stripe events
+const endpointSecret = process.env.STRIPE_WEBHOOK_SECRET;
 
-app.post('nails/webhook', express.raw({ type: 'application/json' }), (request, response) => {
+app.post('/nails/webhook', express.raw({ type: 'application/json' }), (request, response) => {
   const sig = request.headers['stripe-signature'];
-
   let event;
 
-  // Verify the webhook signature to make sure the request is coming from Stripe
   try {
     event = stripe.webhooks.constructEvent(request.body, sig, endpointSecret);
   } catch (err) {
@@ -124,14 +123,15 @@ app.post('nails/webhook', express.raw({ type: 'application/json' }), (request, r
     return response.status(400).send(`Webhook Error: ${err.message}`);
   }
 
-  // Log the event data for debugging purposes
-  console.log('Received webhook event:', event);
+  // Log the incoming event data
+  console.log('Received Webhook Event:', event);
 
-  // Handle the 'checkout.session.completed' event
+  // Handle 'checkout.session.completed' event
   if (event.type === 'checkout.session.completed') {
     const session = event.data.object;
 
-    console.log('Checkout Session Completed:', session);
+    // Log the customer email to check if it's valid
+    console.log('Customer Email from Webhook:', session.customer_email); // Check this value
 
     // Send the confirmation email after successful payment
     sendOrderConfirmationEmail(session);
@@ -140,6 +140,7 @@ app.post('nails/webhook', express.raw({ type: 'application/json' }), (request, r
   // Respond to acknowledge receipt of the event
   response.status(200).send('Webhook received');
 });
+
 
 // Function to send the confirmation email
 function sendOrderConfirmationEmail(session) {
