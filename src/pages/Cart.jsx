@@ -1,36 +1,48 @@
 import React, { useState } from 'react';
 import { useCart } from '../contexts/CartContext';
 import { Link } from 'react-router-dom';
-import { Helmet } from 'react-helmet'
-import Footer from '../components/Footer'
+import { Helmet } from 'react-helmet';
+import Footer from '../components/Footer';
+
 import './Cart.css';
 
 const Cart = () => {
   const { cart, updateQuantity, removeFromCart, clearCart } = useCart();
-  const [email, setEmail] = useState('');
   const [optIn, setOptIn] = useState(true);
 
   const handleCheckout = async () => {
+    if (cart.length === 0) {
+      alert('Your cart is empty. Please add items to your cart before proceeding.');
+      return;
+    }
+
     try {
-      const response = await fetch('https://nenethearchitect.onrender.com/create-checkout-session', {
+      // Determine the backend URL based on environment
+      const backendUrl = process.env.REACT_APP_BACKEND_URL;
+      
+      // Send the cart and opt-in status to the backend to create the checkout session
+      const response = await fetch(`${backendUrl}/create-checkout-session`, {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({
-          items: cart,
-          email,
-          optedIn: optIn,
+          items: cart,   // Pass the cart items
+          optedIn: optIn, // Pass the opt-in status
+          customer_email: 'customer@example.com',
         }),
       });
-      
+
       const data = await response.json();
+
       if (data.url) {
+        // Redirect to Stripe checkout page
         window.location.href = data.url;
       } else {
         alert('Something went wrong during checkout.');
+        console.error('Checkout response data:', data);  
       }
     } catch (err) {
       console.error('Checkout error:', err);
-      alert('Error starting checkout. See console.');
+      alert(`Error starting checkout: ${err.message}. See console for details.`);
     }
   };
 
@@ -53,13 +65,14 @@ const Cart = () => {
         <meta property="og:url" content="https://nenethearchitect.com/nails/cart" />
         <meta property="og:image" content="https://nenethearchitect.com/preview.png" />
       </Helmet>
+
       <div className="cart-wrapper">
         <div className="cart-page">
           <Link to="/nails" className="back-button">← Back to Shop</Link>
           <h1>Your Cart</h1>
 
           {cart.length === 0 ? (
-            <p>Your cart is empty.</p>
+            <p>Your cart is empty. Please add items to your cart before proceeding.</p>
           ) : (
             <>
               <div className="cart-table-wrapper">
@@ -103,11 +116,14 @@ const Cart = () => {
 
               <div className="actions">
                 <button onClick={clearCart}>Clear Cart</button>
-                <button onClick={handleCheckout}>Checkout</button>
+                <button onClick={handleCheckout} disabled={cart.length === 0}>Checkout</button>
               </div>
             </>
           )}
+
           <div className="checkout-email-form">
+            {/* Optional: If you plan to collect an email later, enable it here */}
+            {/* <input type="email" placeholder="Enter your email" /> */}
 
             <label className="checkbox-label">
               <input
@@ -120,6 +136,7 @@ const Cart = () => {
           </div>
         </div>
       </div>
+
       <Footer />
     </>
   );

@@ -37,8 +37,8 @@ export const CartProvider = ({ children }) => {
       }
     });
   }; 
-
-  const updateQuantity = (index, newQty) => {
+// eslint-disable-next-line
+  const updateQuantity = (index, newQty) => { 
     setCart((prev) => {
       const updated = [...prev];
       if (newQty <= 0) return prev;

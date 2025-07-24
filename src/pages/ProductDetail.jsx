@@ -74,115 +74,116 @@ const ProductDetail = () => {
 
   if (!data) return <div className="not-found">Product not found.</div>;
 
-  const renderField = (field) => {
-    switch (field) {
-      case 'Color':
-        return (
-          <div className="form-group color-group" key={field}>
-            <label>Color</label>
-            <ColorSwatch
-              onSelect={({ name, hex }) =>
-                setFormState((prev) => ({
-                  ...prev,
-                  color: { name, hex }
-                }))
-              }
-            />
-            {formState.color?.name && (
-              <p className="selected-color-note">
-                Selected Color: <strong>{formState.color.name}</strong>
-              </p>
-            )}
-          </div>
-        );
+  const renderField = (field, idx) => {
+  switch (field) {
+    case 'Color':
+      return (
+        <div className="form-group color-group" key={`color-${idx}`}>
+          <label>Color</label>
+          <ColorSwatch
+            onSelect={({ name, hex }) =>
+              setFormState((prev) => ({
+                ...prev,
+                color: { name, hex }
+              }))
+            }
+          />
+          {formState.color?.name && (
+            <p className="selected-color-note">
+              Selected Color: <strong>{formState.color.name}</strong>
+            </p>
+          )}
+        </div>
+      );
 
-      case 'Shape':
-        return (
-          <div className="form-group">
-            <label>Shape</label>
-            <div className="shape-options">
-              {['Square', 'Almondetto', 'Coffin'].map((shape) => (
-                <button
-                  key={shape}
-                  type="button"
-                  className={`shape-btn ${selectedShape === shape ? 'active' : ''}`}
-                  onClick={() => setSelectedShape(shape)}
-                >
-                  {shape}
-                </button>
-              ))}
-            </div>
+    case 'Shape':
+      return (
+        <div className="form-group" key={`shape-${idx}`}>
+          <label>Shape</label>
+          <div className="shape-options">
+            {['Square', 'Almondetto', 'Coffin'].map((shape) => (
+              <button
+                key={shape}
+                type="button"
+                className={`shape-btn ${selectedShape === shape ? 'active' : ''}`}
+                onClick={() => setSelectedShape(shape)}
+              >
+                {shape}
+              </button>
+            ))}
           </div>
-        );
+        </div>
+      );
 
-      case 'Length':
-        return (
-          <div className="form-group">
-            <label>Length</label>
-            <div className="length-options">
-              {['Extra Short', 'Short', 'Medium', 'Long'].map((length) => (
-                <button
-                  key={length}
-                  type="button"
-                  className={`length-btn ${selectedLength === length ? 'active' : ''}`}
-                  onClick={() => setSelectedLength(length)}
-                >
-                  {length}
-                </button>
-              ))}
-            </div>
+    case 'Length':
+      return (
+        <div className="form-group" key={`length-${idx}`}>
+          <label>Length</label>
+          <div className="length-options">
+            {['Extra Short', 'Short', 'Medium', 'Long'].map((length) => (
+              <button
+                key={length}
+                type="button"
+                className={`length-btn ${selectedLength === length ? 'active' : ''}`}
+                onClick={() => setSelectedLength(length)}
+              >
+                {length}
+              </button>
+            ))}
           </div>
-        );
+        </div>
+      );
 
-      case 'Add-Ons':
-        return (
-          <div className="form-group" key={field}>
-            <label>Add-Ons (Optional)</label>
-            <input
-              name="addons"
-              placeholder="Chrome, gems, 3D, etc."
-              value={formState.addons}
-              onChange={(e) =>
-                setFormState((prev) => ({ ...prev, addons: e.target.value }))
-              }
-            />
-          </div>
-        );
+    case 'Add-Ons':
+      return (
+        <div className="form-group" key={`addons-${idx}`}>
+          <label>Add-Ons (Optional)</label>
+          <input
+            name="addons"
+            placeholder="Chrome, gems, 3D, etc."
+            value={formState.addons}
+            onChange={(e) =>
+              setFormState((prev) => ({ ...prev, addons: e.target.value }))
+            }
+          />
+        </div>
+      );
 
-      case 'Inspo Image':
-        return (
-          <div className="form-group" key={field}>
-            <label>Inspo Image</label>
-            <input
-              type="file"
-              name="inspo"
-              accept="image/*"
-              onChange={(e) =>
-                setFormState((prev) => ({ ...prev, inspo: e.target.files[0] }))
-              }
-            />
-          </div>
-        );
+    case 'Inspo Image':
+      return (
+        <div className="form-group" key={`inspo-${idx}`}>
+          <label>Inspo Image</label>
+          <input
+            type="file"
+            name="inspo"
+            accept="image/*"
+            onChange={(e) =>
+              setFormState((prev) => ({ ...prev, inspo: e.target.files[0] }))
+            }
+          />
+        </div>
+      );
 
-      case 'Custom Notes':
-        return (
-          <div className="form-group" key={field}>
-            <label>Custom Notes</label>
-            <textarea
-              name="notes"
-              placeholder="Tell me what you’re envisioning..."
-              value={formState.notes}
-              onChange={(e) =>
-                setFormState((prev) => ({ ...prev, notes: e.target.value }))
-              }
-            />
-          </div>
-        );
+    case 'Custom Notes':
+      return (
+        <div className="form-group" key={`notes-${idx}`}>
+          <label>Custom Notes</label>
+          <textarea
+            name="notes"
+            placeholder="Tell me what you’re envisioning..."
+            value={formState.notes}
+            onChange={(e) =>
+              setFormState((prev) => ({ ...prev, notes: e.target.value }))
+            }
+          />
+        </div>
+      );
 
-      default:
-        return null;
-    }
-  };
+    default:
+      return null;
+  }
+};
+
 
   return (
     <>

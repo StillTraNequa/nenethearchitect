@@ -1,47 +1,89 @@
+const path = require('path');
 const express = require('express');
 const cors = require('cors');
 const dotenv = require('dotenv');
 const Stripe = require('stripe');
+const nodemailer = require('nodemailer'); // For sending emails
 
-dotenv.config();
+dotenv.config();  // Load environment variables from .env file
 
-const app = express();
 const stripe = Stripe(process.env.STRIPE_SECRET_KEY);
+const app = express();
 
-// Middleware
-app.use(cors({ origin: process.env.FRONTEND_URL })); // Change to your frontend domain
+// Define allowed origins for CORS
+const allowedOrigins = [
+  'http://localhost:3000',  // Local development frontend
+  'https://nenethearchitect.com',  // Production frontend
+];
+
+// CORS middleware configuration
+app.use(cors({
+  origin: (origin, callback) => {
+    if (!origin || allowedOrigins.includes(origin)) {
+      callback(null, true);
+    } else {
+      callback(new Error('Not allowed by CORS'));
+    }
+  }
+}));
+
+// Middleware to parse JSON bodies
 app.use(express.json());
 
+// Basic route to test server is working
 app.get('/', (req, res) => {
   res.send('Hello, the backend is working!');
 });
 
-app.get('/nails', (req, res) => {
-  res.send('Nails route is working!');
+// Serve static files from React build folder (production)
+// app.use(express.static(path.join(__dirname, 'build')));
+
+// Catch-all route for React Router (for production)
+// app.get('*', (req, res) => {
+//   res.sendFile(path.resolve(__dirname, 'build', 'index.html'));
+// });
+
+app.get('/nails/:slug', (req, res) => {
+  const { slug } = req.params;
+
+  if (!slug) {
+    return res.status(400).send('Slug parameter is missing!');
+  }
+
+  // Proceed with normal logic if slug is present
+  res.send(`Slug received: ${slug}`);
 });
 
 // Route to create checkout session
 app.post('/create-checkout-session', async (req, res) => {
+  console.log('Request received for /create-checkout-session');
+  console.log(req.body);  // Log the request body for debugging
+
   try {
-    const { items, email, optedIn } = req.body;
+    const { items, optedIn } = req.body;
 
-    const line_items = items.map(item => ({
-      price_data: {
-        currency: 'usd',
-        product_data: {
-          name: item.title,
-          description: item.notes || 'Custom press-on nail set',
+    // Format the cart items into Stripe line items
+    const line_items = items.map(item => {
+      console.log('Item:', item);  // Log the item to make sure it contains the necessary fields
+
+      return {
+        price_data: {
+          currency: 'usd',
+          product_data: {
+            name: item.title,  // The name of the product
+            description: item.notes || 'Custom press-on nail set',  // Product description
+          },
+          unit_amount: parseInt(item.price.replace('$', '').replace('+', '')) * 100,  // Convert price to cents
         },
-        unit_amount: parseInt(item.price.replace('$', '').replace('+', '')) * 100,
-      },
-      quantity: item.quantity,
-    }));
+        quantity: item.quantity,  // Quantity of the item
+      };
+    });
 
+    // Create a Stripe checkout session
     const session = await stripe.checkout.sessions.create({
       payment_method_types: ['card'],
       line_items,
       mode: 'payment',
-      customer_email: email,
       success_url: `${process.env.FRONTEND_URL}/nails/thank-you`,
       cancel_url: `${process.env.FRONTEND_URL}/nails/cart`,
       metadata: {
@@ -49,6 +91,7 @@ app.post('/create-checkout-session', async (req, res) => {
       },
     });
 
+    // Respond with the URL to redirect to Stripe's checkout page
     res.json({ url: session.url });
   } catch (err) {
     console.error('Error creating checkout session', err);
@@ -56,32 +99,80 @@ app.post('/create-checkout-session', async (req, res) => {
   }
 });
 
-app.post('/webhook', express.raw({ type: 'application/json' }), (request, response) => {
+// Webhook for Stripe events
+const endpointSecret = "whsec_3daf2d87b1e5dd8199a7a9a221f1d7f1a5fa0ee002f943981231572e40d45fb4";
+
+app.post('nails/webhook', express.raw({ type: 'application/json' }), (request, response) => {
   const sig = request.headers['stripe-signature'];
 
   let event;
+
+  // Verify the webhook signature to make sure the request is coming from Stripe
   try {
-    event = stripe.webhooks.constructEvent(request.body, sig, process.env.STRIPE_WEBHOOK_SECRET);
+    event = stripe.webhooks.constructEvent(request.body, sig, endpointSecret);
   } catch (err) {
     console.error('Webhook signature verification failed:', err.message);
-    return response.sendStatus(400);
+    return response.status(400).send(`Webhook Error: ${err.message}`);
   }
 
+  // Log the event data for debugging purposes
+  console.log('Received webhook event:', event);
+
+  // Handle the 'checkout.session.completed' event
   if (event.type === 'checkout.session.completed') {
     const session = event.data.object;
 
-    const email = session.customer_email;
-    const optedIn = session.metadata?.optedIn === 'true';
+    console.log('Checkout Session Completed:', session);
 
-    if (optedIn && email) {
-      console.log('✅ Send to Google Sheets:', email);
-      // TODO: Add function here to send to Google Sheet
-    }
+    // Send the confirmation email after successful payment
+    sendOrderConfirmationEmail(session);
   }
 
+  // Respond to acknowledge receipt of the event
   response.status(200).send('Webhook received');
 });
 
+// Function to send the confirmation email
+function sendOrderConfirmationEmail(session) {
+  const transporter = nodemailer.createTransport({
+    host: 'smtp.hostinger.com',
+    port: 465,
+    secure: true,
+    auth: {
+      user: process.env.EMAIL_USER,  // Your email address
+      pass: process.env.EMAIL_PASS,  // Your password (including the '#')
+    },
+  });
 
-// Start server
-app.listen(4242, () => console.log('Stripe backend running on port 4242'));
+  const mailOptions = {
+    from: process.env.EMAIL_USER,  // Sender email address
+    to: session.customer_email,    // Customer's email from the Stripe session
+    subject: 'Order Confirmation - NeNeNail’dIt',
+    text: `
+      Thank you for your purchase! Your order has been confirmed. We will start preparing it soon.
+
+      Order Summary:
+      - Product: ${session.display_items[0].custom.name}
+      - Total: ${(session.amount_total / 100).toFixed(2)} ${session.currency.toUpperCase()}
+
+      You will receive an email when your order is shipped.
+
+      Best regards,
+      NeNeNail’dIt Team
+    `,
+  };
+
+  // Send the email
+  transporter.sendMail(mailOptions, (error, info) => {
+    if (error) {
+      console.error('Error sending confirmation email:', error);
+    } else {
+      console.log('Confirmation email sent: ' + info.response);
+    }
+  });
+}
+
+// Start the server
+app.listen(4242, () => {
+  console.log('Server is running on port 4242');
+});

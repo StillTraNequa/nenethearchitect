@@ -1,11 +1,12 @@
 const express = require('express');
+const dotenv = require('dotenv');
 const Stripe = require('stripe');
 const router = express.Router();
 
 const stripe = Stripe(process.env.STRIPE_SECRET_KEY); 
 
 router.post('/create-checkout-session', async (req, res) => {
-  const { items, email } = req.body;
+  const { items } = req.body;
 
   const line_items = items.map((item) => ({
     price_data: {
@@ -18,14 +19,14 @@ router.post('/create-checkout-session', async (req, res) => {
     },
     quantity: item.quantity,
   }));
-
   
+
   try {
     const session = await stripe.checkout.sessions.create({
       payment_method_types: ['card'],
       line_items,
       mode: 'payment',
-      customer_email: email, 
+      // customer_email: email, 
       success_url: `${process.env.FRONTEND_URL}/thank-you`,
       cancel_url: `${process.env.FRONTEND_URL}/cart`,
     });
