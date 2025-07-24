@@ -3,7 +3,7 @@ const express = require('express');
 const cors = require('cors');
 const dotenv = require('dotenv');
 const Stripe = require('stripe');
-const nodemailer = require('nodemailer'); // For sending emails
+// const nodemailer = require('nodemailer'); // For sending emails
 
 dotenv.config();  // Load environment variables from .env file
 
@@ -36,12 +36,12 @@ app.get('/', (req, res) => {
 });
 
 // Serve static files from React build folder (production)
-// app.use(express.static(path.join(__dirname, 'build')));
+app.use(express.static(path.join(__dirname, 'build')));
 
 // Catch-all route for React Router (for production)
-// app.get('*', (req, res) => {
-//   res.sendFile(path.resolve(__dirname, 'build', 'index.html'));
-// });
+app.get('*', (req, res) => {
+  res.sendFile(path.resolve(__dirname, 'build', 'index.html'));
+});
 
 app.get('/nails/:slug', (req, res) => {
   const { slug } = req.params;
