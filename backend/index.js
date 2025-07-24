@@ -10,6 +10,11 @@ dotenv.config();  // Load environment variables from .env file
 const stripe = Stripe(process.env.STRIPE_SECRET_KEY);
 const app = express();
 
+function isValidEmail(email) {
+  const re = /^[a-zA-Z0-9._%+-]+@[a-zA-Z0-9.-]+\.[a-zA-Z]{2,}$/;
+  return re.test(email);
+} 
+
 // Define allowed origins for CORS
 const allowedOrigins = [
   'http://localhost:3000',  // Local development frontend
@@ -60,7 +65,7 @@ app.post('/create-checkout-session', async (req, res) => {
   console.log(req.body);  // Log the request body for debugging
 
   try {
-    const { items, optedIn } = req.body;
+    const { items, optedIn, customer_email } = req.body;
 
     if (!customer_email || !isValidEmail(customer_email)) {
       return res.status(400).json({ error: 'Invalid email address' });
