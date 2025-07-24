@@ -96,8 +96,9 @@ app.post('/create-checkout-session', async (req, res) => {
       success_url: `${process.env.FRONTEND_URL}/nails/thank-you`,
       cancel_url: `${process.env.FRONTEND_URL}/nails/cart`,
       metadata: {
-        optedIn: optedIn ? 'true' : 'false',
+        optedIn: optedIn ? 'true' : 'false'
       },
+      customer_email
     });
 
     // Respond with the URL to redirect to Stripe's checkout page
