@@ -109,7 +109,6 @@ app.post('/create-checkout-session', async (req, res) => {
 });
 
 // Webhook for Stripe events
-// Webhook for Stripe events
 const endpointSecret = process.env.STRIPE_WEBHOOK_SECRET;
 
 app.post('/nails/webhook', express.raw({ type: 'application/json' }), (request, response) => {
