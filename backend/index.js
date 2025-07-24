@@ -3,7 +3,7 @@ const express = require('express');
 const cors = require('cors');
 const dotenv = require('dotenv');
 const Stripe = require('stripe');
-// const nodemailer = require('nodemailer'); // For sending emails
+const nodemailer = require('nodemailer'); // For sending emails
 
 dotenv.config();  // Load environment variables from .env file
 
@@ -61,6 +61,10 @@ app.post('/create-checkout-session', async (req, res) => {
 
   try {
     const { items, optedIn } = req.body;
+
+    if (!customer_email || !isValidEmail(customer_email)) {
+      return res.status(400).json({ error: 'Invalid email address' });
+    }
 
     // Format the cart items into Stripe line items
     const line_items = items.map(item => {

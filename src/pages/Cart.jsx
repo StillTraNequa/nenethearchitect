@@ -9,6 +9,7 @@ import './Cart.css';
 const Cart = () => {
   const { cart, updateQuantity, removeFromCart, clearCart } = useCart();
   const [optIn, setOptIn] = useState(true);
+  const [email, setEmail] = useState("");  // State to hold the email input
 
   const handleCheckout = async () => {
     if (cart.length === 0) {
@@ -16,18 +17,23 @@ const Cart = () => {
       return;
     }
 
+    if (!email || !isValidEmail(email)) {
+      alert('Please enter a valid email address.');
+      return;
+    }
+
     try {
       // Determine the backend URL based on environment
       const backendUrl = process.env.REACT_APP_BACKEND_URL;
       
-      // Send the cart and opt-in status to the backend to create the checkout session
+      // Send the cart, opt-in status, and email to the backend to create the checkout session
       const response = await fetch(`${backendUrl}/create-checkout-session`, {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({
           items: cart,   // Pass the cart items
           optedIn: optIn, // Pass the opt-in status
-          customer_email: 'customer@example.com',
+          customer_email: email,  // Pass the email
         }),
       });
 
@@ -45,6 +51,12 @@ const Cart = () => {
       alert(`Error starting checkout: ${err.message}. See console for details.`);
     }
   };
+
+  // Helper function to validate email format
+  function isValidEmail(email) {
+    const re = /^[a-zA-Z0-9._%+-]+@[a-zA-Z0-9.-]+\.[a-zA-Z]{2,}$/;
+    return re.test(email);
+  }
 
   const calculateTotal = () => {
     return cart.reduce((total, item) => {
@@ -122,9 +134,12 @@ const Cart = () => {
           )}
 
           <div className="checkout-email-form">
-            {/* Optional: If you plan to collect an email later, enable it here */}
-            {/* <input type="email" placeholder="Enter your email" /> */}
-
+            <input 
+              type="email" 
+              placeholder="Enter your email" 
+              value={email} 
+              onChange={(e) => setEmail(e.target.value)} 
+            />
             <label className="checkbox-label">
               <input
                 type="checkbox"
