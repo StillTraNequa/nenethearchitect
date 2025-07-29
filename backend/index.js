@@ -3,186 +3,153 @@ const express = require('express');
 const cors = require('cors');
 const dotenv = require('dotenv');
 const Stripe = require('stripe');
-const nodemailer = require('nodemailer'); // For sending emails
+const nodemailer = require('nodemailer');
 
-dotenv.config();  // Load environment variables from .env file
+dotenv.config();
 
 const stripe = Stripe(process.env.STRIPE_SECRET_KEY);
 const app = express();
+const PORT = process.env.PORT || 4242;
 
 function isValidEmail(email) {
   const re = /^[a-zA-Z0-9._%+-]+@[a-zA-Z0-9.-]+\.[a-zA-Z]{2,}$/;
   return re.test(email);
-} 
+}
 
-// Define allowed origins for CORS
+// CORS config
 const allowedOrigins = [
-  'http://localhost:3000',  // Local development frontend
-  'https://nenethearchitect.com',  // Production frontend
+  'http://localhost:3000',
+  'https://nenethearchitect.com',
 ];
-
-// CORS middleware configuration
 app.use(cors({
   origin: (origin, callback) => {
-    if (!origin || allowedOrigins.includes(origin)) {
-      callback(null, true);
-    } else {
-      callback(new Error('Not allowed by CORS'));
-    }
+    if (!origin || allowedOrigins.includes(origin)) callback(null, true);
+    else callback(new Error('Blocked by CORS'));
   }
 }));
 
-// Middleware to parse JSON bodies
-app.use(express.json());
+const checkoutRoutes = require('./routes/checkout');
+app.use('/api/checkout', checkoutRoutes);
 
-// Basic route to test server is working
-app.get('/', (req, res) => {
-  res.send('Hello, the backend is working!');
-});
+// Stripe webhook requires raw body, must come BEFORE express.json for this route
+const endpointSecret = process.env.STRIPE_WEBHOOK_SECRET;
+app.post('/nails/webhook', express.raw({ type: 'application/json' }), (req, res) => {
+  const sig = req.headers['stripe-signature'];
+  let event;
 
-// Serve static files from React build folder (production)
-app.use(express.static(path.join(__dirname, 'build')));
-
-// Catch-all route for React Router (for production)
-app.get('*', (req, res) => {
-  res.sendFile(path.resolve(__dirname, 'build', 'index.html'));
-});
-
-app.get('/nails/:slug', (req, res) => {
-  const { slug } = req.params;
-
-  if (!slug) {
-    return res.status(400).send('Slug parameter is missing!');
+  try {
+    event = stripe.webhooks.constructEvent(req.body, sig, endpointSecret);
+  } catch (err) {
+    console.error('Webhook signature verification failed:', err.message);
+    return res.status(400).send(`Webhook Error: ${err.message}`);
   }
 
-  // Proceed with normal logic if slug is present
+  console.log('Received Webhook Event:', event.type);
+
+  if (event.type === 'checkout.session.completed') {
+    const session = event.data.object;
+    console.log('Webhook customer email:', session.customer_email);
+    console.log('Opted in:', session.metadata?.optedIn);
+    sendOrderConfirmationEmail(session);
+  }
+
+  res.status(200).send('Webhook received');
+});
+
+// Normal JSON parsing for all other routes
+app.use(express.json());
+
+// Root test route
+app.get('/', (req, res) => {
+  res.send('Backend is working!');
+});
+
+// Dynamic nail slug route
+app.get('/nails/:slug', (req, res) => {
+  const { slug } = req.params;
+  if (!slug) return res.status(400).send('Slug missing!');
   res.send(`Slug received: ${slug}`);
 });
 
-// Route to create checkout session
+// Stripe checkout session route
 app.post('/create-checkout-session', async (req, res) => {
-  console.log('Request received for /create-checkout-session');
-  console.log(req.body);  // Log the request body for debugging
+  console.log('Creating checkout session...');
+  const { items, optedIn, customer_email } = req.body;
+
+  if (!customer_email || !isValidEmail(customer_email)) {
+    return res.status(400).json({ error: 'Invalid email address' });
+  }
 
   try {
-    const { items, optedIn, customer_email } = req.body;
-
-    if (!customer_email || !isValidEmail(customer_email)) {
-      return res.status(400).json({ error: 'Invalid email address' });
-    }
-
-    // Format the cart items into Stripe line items
-    const line_items = items.map(item => {
-      console.log('Item:', item);  // Log the item to make sure it contains the necessary fields
-
-      return {
-        price_data: {
-          currency: 'usd',
-          product_data: {
-            name: item.title,  // The name of the product
-            description: item.notes || 'Custom press-on nail set',  // Product description
-          },
-          unit_amount: parseInt(item.price.replace('$', '').replace('+', '')) * 100,  // Convert price to cents
+    const line_items = items.map(item => ({
+      price_data: {
+        currency: 'usd',
+        product_data: {
+          name: item.title || 'Custom Nail Set',
+          description: item.notes || 'Custom press-on nails',
+          images: [item.thumbnail || 'https://nenethearchitect.com/nails-preview-placeholder.jpg']
         },
-        quantity: item.quantity,  // Quantity of the item
-      };
-    });
+        unit_amount: parseInt(item.price.replace('$', '').replace('+', '')) * 100
+      },
+      quantity: item.quantity
+    }));
 
-    // Create a Stripe checkout session
     const session = await stripe.checkout.sessions.create({
       payment_method_types: ['card'],
       line_items,
       mode: 'payment',
       success_url: `${process.env.FRONTEND_URL}/nails/thank-you`,
       cancel_url: `${process.env.FRONTEND_URL}/nails/cart`,
+      customer_email,
       metadata: {
         optedIn: optedIn ? 'true' : 'false'
-      },
-      customer_email
+      }
     });
 
-    // Respond with the URL to redirect to Stripe's checkout page
     res.json({ url: session.url });
   } catch (err) {
-    console.error('Error creating checkout session', err);
+    console.error('Error creating Stripe session:', err);
     res.status(500).json({ error: err.message });
   }
 });
 
-// Webhook for Stripe events
-const endpointSecret = process.env.STRIPE_WEBHOOK_SECRET;
-
-app.post('/nails/webhook', express.raw({ type: 'application/json' }), (request, response) => {
-  const sig = request.headers['stripe-signature'];
-  let event;
-
-  try {
-    event = stripe.webhooks.constructEvent(request.body, sig, endpointSecret);
-  } catch (err) {
-    console.error('Webhook signature verification failed:', err.message);
-    return response.status(400).send(`Webhook Error: ${err.message}`);
-  }
-
-  // Log the incoming event data
-  console.log('Received Webhook Event:', event);
-
-  // Handle 'checkout.session.completed' event
-  if (event.type === 'checkout.session.completed') {
-    const session = event.data.object;
-
-    // Log the customer email to check if it's valid
-    console.log('Customer Email from Webhook:', session.customer_email); // Check this value
-
-    // Send the confirmation email after successful payment
-    sendOrderConfirmationEmail(session);
-  }
-
-  // Respond to acknowledge receipt of the event
-  response.status(200).send('Webhook received');
-});
-
-
-// Function to send the confirmation email
+// Confirmation email sender
 function sendOrderConfirmationEmail(session) {
   const transporter = nodemailer.createTransport({
     host: 'smtp.hostinger.com',
     port: 465,
     secure: true,
     auth: {
-      user: process.env.EMAIL_USER,  // Your email address
-      pass: process.env.EMAIL_PASS,  // Your password (including the '#')
-    },
+      user: process.env.EMAIL_USER,
+      pass: process.env.EMAIL_PASS
+    }
   });
 
   const mailOptions = {
-    from: process.env.EMAIL_USER,  // Sender email address
-    to: session.customer_email,    // Customer's email from the Stripe session
+    from: process.env.EMAIL_USER,
+    to: session.customer_email,
     subject: 'Order Confirmation - NeNeNail’dIt',
     text: `
-      Thank you for your purchase! Your order has been confirmed. We will start preparing it soon.
+Thank you for your purchase!
 
-      Order Summary:
-      - Product: ${session.display_items[0].custom.name}
-      - Total: ${(session.amount_total / 100).toFixed(2)} ${session.currency.toUpperCase()}
+Order Confirmation:
+- Customer: ${session.customer_email}
+- Order ID: ${session.id}
+- Total: $${(session.amount_total / 100).toFixed(2)}
 
-      You will receive an email when your order is shipped.
+We’ll begin preparing your nails soon. You’ll receive an update when it’s shipped.
 
-      Best regards,
-      NeNeNail’dIt Team
-    `,
+Thank you again for shopping at NeNeNail’dIt 💅🏽
+      `
   };
 
-  // Send the email
   transporter.sendMail(mailOptions, (error, info) => {
-    if (error) {
-      console.error('Error sending confirmation email:', error);
-    } else {
-      console.log('Confirmation email sent: ' + info.response);
-    }
+    if (error) return console.error('Email failed:', error);
+    console.log('Confirmation email sent:', info.response);
   });
 }
 
-// Start the server
-app.listen(4242, () => {
-  console.log('Server is running on port 4242');
+// Start server
+app.listen(PORT, () => {
+  console.log(`Server running on port ${PORT}`);
 });

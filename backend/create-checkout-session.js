@@ -6,7 +6,7 @@ const router = express.Router();
 const stripe = Stripe(process.env.STRIPE_SECRET_KEY); 
 
 router.post('/create-checkout-session', async (req, res) => {
-  const { items } = req.body;
+  const { items, email, optedIn } = req.body;
 
   const line_items = items.map((item) => ({
     price_data: {
@@ -15,6 +15,9 @@ router.post('/create-checkout-session', async (req, res) => {
         name: item.title,
         images: [item.thumbnail || 'https://nenethearchitect.com/nails-preview-placeholder.jpg'],
       },
+      metadata: {
+    optedIn: optedIn ? 'yes' : 'no',
+  },
       unit_amount: parseInt(item.price.replace('$', '')) * 100, // $22 -> 2200 cents
     },
     quantity: item.quantity,
@@ -26,7 +29,7 @@ router.post('/create-checkout-session', async (req, res) => {
       payment_method_types: ['card'],
       line_items,
       mode: 'payment',
-      // customer_email: email, 
+      customer_email: email, 
       success_url: `${process.env.FRONTEND_URL}/thank-you`,
       cancel_url: `${process.env.FRONTEND_URL}/cart`,
     });
