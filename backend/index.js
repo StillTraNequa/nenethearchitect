@@ -28,8 +28,6 @@ app.use(cors({
   }
 }));
 
-const checkoutRoutes = require('./routes/checkout');
-app.use('/api/checkout', checkoutRoutes);
 
 // Stripe webhook requires raw body, must come BEFORE express.json for this route
 const endpointSecret = process.env.STRIPE_WEBHOOK_SECRET;
@@ -62,6 +60,10 @@ app.use(express.json());
 // Root test route
 app.get('/', (req, res) => {
   res.send('Backend is working!');
+});
+
+app.get('/nails', (req, res) => {
+  res.json({ message: 'Nails endpoint live!' });
 });
 
 // Dynamic nail slug route
