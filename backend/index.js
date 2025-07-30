@@ -65,10 +65,6 @@ app.get('/', (req, res) => {
   res.send('Backend is working!');
 });
 
-app.get('/nails', (req, res) => {
-  res.json({ message: 'Nails endpoint live!' });
-});
-
 // Dynamic nail slug route
 app.get('/nails/:slug', (req, res) => {
   const { slug } = req.params;
