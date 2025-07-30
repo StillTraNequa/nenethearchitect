@@ -28,6 +28,9 @@ app.use(cors({
   }
 }));
 
+// Serve static frontend from React build folder
+const buildPath = path.join(__dirname, '../build');
+app.use(express.static(buildPath));
 
 // Stripe webhook requires raw body, must come BEFORE express.json for this route
 const endpointSecret = process.env.STRIPE_WEBHOOK_SECRET;
@@ -65,6 +68,8 @@ app.get('/', (req, res) => {
 app.get('/nails', (req, res) => {
   res.json({ message: 'Nails endpoint live!' });
 });
+
+
 
 // Dynamic nail slug route
 app.get('/nails/:slug', (req, res) => {
@@ -150,10 +155,6 @@ Thank you again for shopping at NeNeNail’dIt 💅🏽
     console.log('Confirmation email sent:', info.response);
   });
 }
-
-// Serve static frontend from React build folder
-const buildPath = path.join(__dirname, '../build');
-app.use(express.static(buildPath));
 
 // Fallback route to handle React Router paths like /nails
 app.get('*', (req, res) => {
