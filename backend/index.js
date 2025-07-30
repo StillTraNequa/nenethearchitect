@@ -69,8 +69,6 @@ app.get('/nails', (req, res) => {
   res.json({ message: 'Nails endpoint live!' });
 });
 
-
-
 // Dynamic nail slug route
 app.get('/nails/:slug', (req, res) => {
   const { slug } = req.params;
@@ -157,9 +155,16 @@ Thank you again for shopping at NeNeNail’dIt 💅🏽
 }
 
 // Fallback route to handle React Router paths like /nails
-app.get('*', (req, res) => {
+// Serve React for all frontend routes EXCEPT API/backend routes
+app.get('*', (req, res, next) => {
+  const isApi =
+  req.path === '/create-checkout-session' ||
+  req.path === '/nails/webhook';
+ // Avoid overriding API routes
+  if (isApi) return next();
   res.sendFile(path.join(buildPath, 'index.html'));
 });
+
 
 // Start server
 app.listen(PORT, () => {
