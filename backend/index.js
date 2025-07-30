@@ -28,9 +28,6 @@ app.use(cors({
   }
 }));
 
-// Serve static frontend from React build folder
-const buildPath = path.join(__dirname, '../build');
-app.use(express.static(buildPath));
 
 // Stripe webhook requires raw body, must come BEFORE express.json for this route
 const endpointSecret = process.env.STRIPE_WEBHOOK_SECRET;
