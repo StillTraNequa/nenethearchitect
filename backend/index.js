@@ -151,6 +151,15 @@ Thank you again for shopping at NeNeNail’dIt 💅🏽
   });
 }
 
+// Serve static frontend from React build folder
+const buildPath = path.join(__dirname, '../build');
+app.use(express.static(buildPath));
+
+// Fallback route to handle React Router paths like /nails
+app.get('*', (req, res) => {
+  res.sendFile(path.join(buildPath, 'index.html'));
+});
+
 // Start server
 app.listen(PORT, () => {
   console.log(`Server running on port ${PORT}`);
