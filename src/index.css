@@ -1,5 +1,9 @@
 @import url('https://fonts.googleapis.com/css2?family=Anonymous+Pro:wght@400;700&display=swap');
 @import url(https://db.onlinewebfonts.com/c/3163ac25d9e794b6612569ef09b2fa59?family=Ahkio-Bold);
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
 
 :root {
   --primary-color: #fdc7d7;

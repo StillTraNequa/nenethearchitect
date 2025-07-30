@@ -12,25 +12,25 @@ const productDetails = {
     title: 'Classic NeNe',
     price: '$22',
     description: 'Solid color press-ons in your favorite shade. Simple, sleek, and timeless.',
-    fields: ['Color', 'Shape', 'Length'],
+    fields: ['Color', 'Shape', 'Length', 'Sizes'],
   },
   frenchie: {
     title: 'Frenchie & Friends',
     price: '$33',
     description: 'French tips, 1 3D element, or a full chrome set. Intermediate but bold.',
-    fields: ['Color', 'Shape', 'Length', 'Add-Ons', 'Inspo Image', 'Custom Notes'],
+    fields: ['Color', 'Shape', 'Length', 'Sizes', 'Add-Ons', 'Inspo Image', 'Custom Notes'],
   },
   museum: {
     title: 'The Museum',
     price: '$44',
     description: 'Statement sets with layered gel, chrome, & designs. For main character energy.',
-    fields: ['Color', 'Shape', 'Length', 'Add-Ons', 'Inspo Image', 'Custom Notes'],
+    fields: ['Color', 'Shape', 'Length', 'Sizes', 'Add-Ons', 'Inspo Image', 'Custom Notes'],
   },
   custom: {
     title: 'Custom Set',
     price: '$55+',
     description: 'Let’s build from scratch — inspired by your vision, occasion, or mood.',
-    fields: ['Color', 'Shape', 'Length', 'Add-Ons', 'Inspo Image', 'Custom Notes'],
+    fields: ['Color', 'Shape', 'Length', 'Sizes','Add-Ons', 'Inspo Image', 'Custom Notes'],
     isCustom: true,
   },
 };
@@ -40,6 +40,7 @@ const ProductDetail = () => {
   const data = productDetails[slug];
   const [selectedShape, setSelectedShape] = useState('');
   const [selectedLength, setSelectedLength] = useState('');
+  const [errors, setErrors] = useState({});
   const { addToCart } = useCart();
   const navigate = useNavigate();
 
@@ -47,6 +48,7 @@ const ProductDetail = () => {
     color: '',
     shape: '',
     length: '',
+    sizes: '',
     addons: '',
     inspo: null,
     notes: '',
@@ -54,6 +56,22 @@ const ProductDetail = () => {
 
   const handleSubmit = (e) => {
     e.preventDefault();
+    const newErrors = {};
+
+  if (!formState.color) newErrors.color = 'Please select a color.';
+  if (!selectedShape) newErrors.shape = 'Please select a shape.';
+  if (!selectedLength) newErrors.length = 'Please select a length.';
+  if (!formState.sizes) newErrors.sizes = 'Please add your sizes. See FAQs for guidance.'
+  if (data.fields.includes('Add-Ons') && !formState.addons) newErrors.addons = 'Please enter add-ons or type "None".';
+  if (data.fields.includes('Custom Notes') && !formState.notes) newErrors.notes = 'Please add custom notes or type "None".';
+
+  if (Object.keys(newErrors).length > 0) {
+    setErrors(newErrors);
+    return;  // stop submission if errors
+  }
+
+  setErrors({}); // clear errors on success
+
 
     const product = {
       slug,
@@ -62,6 +80,7 @@ const ProductDetail = () => {
       color: formState.color,
       shape: selectedShape,
       length: selectedLength,
+      sizes: formState.sizes,
       addons: formState.addons,
       inspo: formState.inspo,
       notes: formState.notes,
@@ -75,114 +94,138 @@ const ProductDetail = () => {
   if (!data) return <div className="not-found">Product not found.</div>;
 
   const renderField = (field, idx) => {
-  switch (field) {
-    case 'Color':
-      return (
-        <div className="form-group color-group" key={`color-${idx}`}>
-          <label>Color</label>
-          <ColorSwatch
-            onSelect={({ name, hex }) =>
-              setFormState((prev) => ({
-                ...prev,
-                color: { name, hex }
-              }))
-            }
-          />
-          {formState.color?.name && (
-            <p className="selected-color-note">
-              Selected Color: <strong>{formState.color.name}</strong>
-            </p>
-          )}
-        </div>
-      );
-
-    case 'Shape':
-      return (
-        <div className="form-group" key={`shape-${idx}`}>
-          <label>Shape</label>
-          <div className="shape-options">
-            {['Square', 'Almondetto', 'Coffin'].map((shape) => (
-              <button
-                key={shape}
-                type="button"
-                className={`shape-btn ${selectedShape === shape ? 'active' : ''}`}
-                onClick={() => setSelectedShape(shape)}
-              >
-                {shape}
-              </button>
-            ))}
+    switch (field) {
+      case 'Color':
+        return (
+          <div className="form-group color-group" key={`color-${idx}`}>
+            <label>Color <span className="text-red-500">*</span></label>
+            <ColorSwatch
+              onSelect={({ name, hex }) =>
+                setFormState((prev) => ({
+                  ...prev,
+                  color: { name, hex }
+                }))
+              }
+            />
+            {formState.color?.name && (
+              <p className="selected-color-note">
+                Selected Color: <strong>{formState.color.name}</strong>
+              </p>
+            )}
+            {errors.color && <p className="text-red-600 text-sm mt-1">{errors.color}</p>}
           </div>
-        </div>
-      );
+        );
 
-    case 'Length':
-      return (
-        <div className="form-group" key={`length-${idx}`}>
-          <label>Length</label>
-          <div className="length-options">
-            {['Extra Short', 'Short', 'Medium', 'Long'].map((length) => (
-              <button
-                key={length}
-                type="button"
-                className={`length-btn ${selectedLength === length ? 'active' : ''}`}
-                onClick={() => setSelectedLength(length)}
-              >
-                {length}
-              </button>
-            ))}
+      case 'Shape':
+        return (
+          <div className="form-group" key={`shape-${idx}`}>
+            <label>Shape <span className="text-red-500">*</span></label>
+            <div className="shape-options">
+              {['Square', 'Almondetto', 'Coffin'].map((shape) => (
+                <button
+                  key={shape}
+                  type="button"
+                  className={`shape-btn ${selectedShape === shape ? 'active' : ''}`}
+                  onClick={() => setSelectedShape(shape)}
+                >
+                  {shape}
+                </button>
+              ))}
+              {errors.shape && <p className="text-red-600 text-sm mt-1">{errors.shape}</p>} 
+            </div>
           </div>
-        </div>
-      );
+        );
 
-    case 'Add-Ons':
-      return (
-        <div className="form-group" key={`addons-${idx}`}>
-          <label>Add-Ons (Optional)</label>
-          <input
-            name="addons"
-            placeholder="Chrome, gems, 3D, etc."
-            value={formState.addons}
-            onChange={(e) =>
-              setFormState((prev) => ({ ...prev, addons: e.target.value }))
-            }
-          />
-        </div>
-      );
+      case 'Length':
+        return (
+          <div className="form-group" key={`length-${idx}`}>
+            <label>Length <span className="text-red-500">*</span></label>
+            <div className="length-options">
+              {['Extra Short', 'Short', 'Medium', 'Long'].map((length) => (
+                <button
+                  key={length}
+                  type="button"
+                  className={`length-btn ${selectedLength === length ? 'active' : ''}`}
+                  onClick={() => setSelectedLength(length)}
+                >
+                  {length}
+                </button>
+              ))}
+             {errors.length && <p className="text-red-600 text-sm mt-1">{errors.length}</p>} 
+            </div>
+          </div>
+        );
 
-    case 'Inspo Image':
-      return (
-        <div className="form-group" key={`inspo-${idx}`}>
-          <label>Inspo Image</label>
-          <input
-            type="file"
-            name="inspo"
-            accept="image/*"
-            onChange={(e) =>
-              setFormState((prev) => ({ ...prev, inspo: e.target.files[0] }))
-            }
-          />
-        </div>
-      );
+      case 'Sizes':
+        return (
+          <div className="form-group" key={`sizes-${idx}`}>
+            <label>Sizes <span className="text-red-500">*</span></label>
+            <input
+              type="text"
+              name="sizes"
+              placeholder="E.g. Thumb: 17mm, Index: 14mm..."
+              value={formState.sizes}
+              onChange={(e) =>
+                setFormState((prev) => ({ ...prev, sizes: e.target.value }))
+              }
+            />
+            {/* <small className="text-gray-500 text-xs mt-1 block">
+              Leave your nail measurements here if you want a custom fit.
+            </small> */}
+            {errors.sizes && <p className="text-red-600 text-sm mt-1">{errors.sizes}</p>} 
+          </div>
+        );
 
-    case 'Custom Notes':
-      return (
-        <div className="form-group" key={`notes-${idx}`}>
-          <label>Custom Notes</label>
-          <textarea
-            name="notes"
-            placeholder="Tell me what you’re envisioning..."
-            value={formState.notes}
-            onChange={(e) =>
-              setFormState((prev) => ({ ...prev, notes: e.target.value }))
-            }
-          />
-        </div>
-      );
 
-    default:
-      return null;
-  }
-};
+      case 'Add-Ons':
+        return (
+          <div className="form-group" key={`addons-${idx}`}>
+            <label>Add-Ons (Optional)</label>
+            <input
+              name="addons"
+              placeholder="Chrome, gems, 3D, etc."
+              value={formState.addons}
+              onChange={(e) =>
+                setFormState((prev) => ({ ...prev, addons: e.target.value }))
+              }
+            />
+          </div>
+        );
+
+      case 'Inspo Image':
+        return (
+          <div className="form-group" key={`inspo-${idx}`}>
+            <label>Inspo Image</label>
+            <input
+              type="file"
+              name="inspo"
+              accept="image/*"
+              onChange={(e) =>
+                setFormState((prev) => ({ ...prev, inspo: e.target.files[0] }))
+              }
+            />
+          </div>
+        );
+
+      case 'Custom Notes':
+        return (
+          <div className="form-group" key={`notes-${idx}`}>
+            <label>Custom Notes</label>
+            <textarea
+              name="notes"
+              placeholder="Tell me what you’re envisioning..."
+              value={formState.notes}
+              onChange={(e) =>
+                setFormState((prev) => ({ ...prev, notes: e.target.value }))
+              }
+            />
+          </div>
+        );
+
+      default:
+        return null;
+    }
+  };
 
 
   return (
@@ -249,6 +292,16 @@ const ProductDetail = () => {
                 </ul>
               </div>
             )}
+            <p className="mt-4 text-sm text-gray-600">
+              Have questions?{' '}
+              <Link
+                to="/nails/faq"
+                className="text-purple-600 underline hover:text-purple-800"
+              >
+                View our FAQs
+              </Link>
+            </p>
+
 
             <button type="submit">Add to Cart</button>
           </form>

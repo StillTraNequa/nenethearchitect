@@ -4,6 +4,7 @@ import { useNavigate, Link } from 'react-router-dom';
 import heroImage from '../assets/nails-hero.png';
 import Footer from '../components/Footer';
 import './NailShop.css';
+import OnHandNails from '../components/onHandProducts';
 
 const tiers = [
   {
@@ -76,6 +77,7 @@ const NailShop = () => {
           <img src={heroImage} alt="Nail Shop Hero" className="nailshop-hero-image" />
           <h2 className="nailshop-subheadline">Premium press-ons for bold babes who keep it cute and creative.</h2>
         </section>
+        < OnHandNails />
         <section className="nailshop-grid">
           {tiers.map(tier => (
             <div key={tier.id} className="nailshop-card">

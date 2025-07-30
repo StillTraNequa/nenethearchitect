@@ -15,7 +15,7 @@ export const CartProvider = ({ children }) => {
   useEffect(() => {
     localStorage.setItem('neneCart', JSON.stringify(cart));
   }, [cart]);
-  
+
 
   const addToCart = (newItem) => {
     setCart((prev) => {
@@ -24,21 +24,26 @@ export const CartProvider = ({ children }) => {
         item.color?.name === newItem.color?.name &&
         item.shape === newItem.shape &&
         item.length === newItem.length &&
-        item.notes === newItem.notes // Optional: only if notes matter
+        item.notes === newItem.notes
       );
-  
-      if (existingIndex !== -1) {
-        // Update quantity if match found
-        const updatedCart = [...prev];
-        updatedCart[existingIndex].quantity += newItem.quantity || 1;
-        return updatedCart;
-      } else {
-        return [...prev, { ...newItem, quantity: newItem.quantity || 1 }];
-      }
+
+     if (newItem.isOneOfOne && existingIndex !== -1) {
+      // Don't add again if it's a one-of-one
+      return prev;
+    }
+
+    // For normal items: increment quantity if already in cart
+     if (existingIndex !== -1) {
+      const updatedCart = [...prev];
+      updatedCart[existingIndex].quantity += newItem.quantity || 1;
+      return updatedCart;
+    } else {
+      return [...prev, { ...newItem, quantity: newItem.quantity || 1 }];
+    }
     });
-  }; 
-// eslint-disable-next-line
-  const updateQuantity = (index, newQty) => { 
+  };
+
+  const updateQuantity = (index, newQty) => {
     setCart((prev) => {
       const updated = [...prev];
       if (newQty <= 0) return prev;
@@ -46,14 +51,15 @@ export const CartProvider = ({ children }) => {
       return updated;
     });
   };
-  
+
+
   const removeFromCart = (index) =>
     setCart((prev) => prev.filter((_, i) => i !== index));
 
   const clearCart = () => setCart([]);
 
   return (
-    <CartContext.Provider value={{ cart, addToCart, removeFromCart, clearCart }}>
+    <CartContext.Provider value={{ cart, addToCart, removeFromCart, clearCart, updateQuantity }}>
       {children}
     </CartContext.Provider>
   );

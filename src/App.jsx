@@ -10,6 +10,7 @@ import ThankYou from './pages/ThankYou';
 import { initGA } from './utils/analytics';
 import RouteTracker from './components/RouteTracker';
 import FloatingCartButton from "./components/FloatingCartButton";
+import FAQ from "./pages/Faq";
 
 function App() {
   useEffect(() => {
@@ -28,9 +29,11 @@ function App() {
         <Route path="/nails" element={<NailShop />} />
         <Route path="/tech" element={<TechRedirect />} />
         <Route path="/nails/:slug" element={<ProductDetail />} />
+        <Route path="/nails/faq" element={<FAQ />} />
         <Route path="/styling" element={<Styling />} />
         <Route path="/nails/cart" element={<Cart />} />
         <Route path="/nails/thank-you" element={<ThankYou />} />
+
       </Routes>
       {showCart && <FloatingCartButton />}
     </div>

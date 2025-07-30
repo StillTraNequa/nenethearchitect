@@ -25,7 +25,7 @@ const Cart = () => {
     try {
       // Determine the backend URL based on environment
       const backendUrl = process.env.REACT_APP_BACKEND_URL;
-      
+
       // Send the cart, opt-in status, and email to the backend to create the checkout session
       const response = await fetch(`${backendUrl}/create-checkout-session`, {
         method: 'POST',
@@ -44,7 +44,7 @@ const Cart = () => {
         window.location.href = data.url;
       } else {
         alert('Something went wrong during checkout.');
-        console.error('Checkout response data:', data);  
+        console.error('Checkout response data:', data);
       }
     } catch (err) {
       console.error('Checkout error:', err);
@@ -108,11 +108,15 @@ const Cart = () => {
                           {item.length && <div>Length: {item.length}</div>}
                         </td>
                         <td>
-                          <div className="qty-controls">
-                            <button onClick={() => updateQuantity(index, item.quantity - 1)} disabled={item.quantity === 1}>−</button>
-                            <span>{item.quantity}</span>
-                            <button onClick={() => updateQuantity(index, item.quantity + 1)}>+</button>
-                          </div>
+                          {item.isOneOfOne ? (
+                            <span>1</span>
+                          ) : (
+                            <div className="qty-controls">
+                              <button onClick={() => updateQuantity(index, item.quantity - 1)} disabled={item.quantity === 1}>−</button>
+                              <span>{item.quantity}</span>
+                              <button onClick={() => updateQuantity(index, item.quantity + 1)}>+</button>
+                            </div>
+                          )}
                         </td>
                         <td>${(parseFloat(item.price.replace('$', '').replace('+', '')) * item.quantity).toFixed(2)}</td>
                         <td><button onClick={() => removeFromCart(index)}>Remove</button></td>
@@ -134,11 +138,11 @@ const Cart = () => {
           )}
 
           <div className="checkout-email-form">
-            <input 
-              type="email" 
-              placeholder="Enter your email" 
-              value={email} 
-              onChange={(e) => setEmail(e.target.value)} 
+            <input
+              type="email"
+              placeholder="Enter your email"
+              value={email}
+              onChange={(e) => setEmail(e.target.value)}
             />
             <label className="checkbox-label">
               <input
